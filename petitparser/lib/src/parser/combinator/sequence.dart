@@ -5,7 +5,7 @@ import '../../context/result.dart';
 import '../../core/parser.dart';
 import 'list.dart';
 
-extension SequenceParserExtension<T> on Parser<T> {
+extension SequenceParserExtension on Parser {
   /// Returns a parser that accepts the receiver followed by [other]. The
   /// resulting parser returns a list of the parse result of the receiver
   /// followed by the parse result of [other]. Calling this method on an
@@ -26,17 +26,17 @@ extension SequenceParserExtension<T> on Parser<T> {
 
 extension SequenceIterableExtension<T> on Iterable<Parser<T>> {
   /// Converts the parser in this iterable to a sequence of parsers.
-  Parser<List> toSequenceParser() => SequenceParser(this);
+  Parser<List> toSequenceParser() => SequenceParser<T>(this);
 }
 
 /// A parser that parses a sequence of parsers.
-class SequenceParser extends ListParser<List> {
+class SequenceParser<T> extends ListParser<List<T>> {
   SequenceParser(Iterable<Parser> children) : super(children);
 
   @override
-  Result<List> parseOn(Context context) {
+  Result<List<T>> parseOn(Context context) {
     var current = context;
-    final elements = List(children.length);
+    final elements = List<T>.filled(children.length, null);
     for (var i = 0; i < children.length; i++) {
       final result = children[i].parseOn(current);
       if (result.isFailure) {
@@ -60,5 +60,5 @@ class SequenceParser extends ListParser<List> {
   }
 
   @override
-  SequenceParser copy() => SequenceParser(children);
+  SequenceParser<T> copy() => SequenceParser(children);
 }
